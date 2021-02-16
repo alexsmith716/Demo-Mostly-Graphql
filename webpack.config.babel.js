@@ -9,16 +9,18 @@ import TerserPlugin from 'terser-webpack-plugin';
 import nodeExternals from 'webpack-node-externals';
 
 const DIST_PATH = path.resolve(__dirname, 'public/dist');
+const production = process.env.NODE_ENV === 'production';
+const development = !production;
 
 const getConfig = (target) => ({
 	name: target,
-	mode: 'development',
+	mode: development ? 'development' : 'production',
 	target,
 	entry: target === 'node' ? './src/server/renderer.js' : './src/client/index.js',
 	externals: target === 'node' ? ['@loadable/component', nodeExternals()] : undefined,
 	output: {
 		path: path.join(DIST_PATH, target),
-		filename: '[name].js',
+		filename: production ? '[name]-bundle-[chunkhash:8].js' : '[name].js',
 		publicPath: `/dist/${target}/`,
 		libraryTarget: target === 'node' ? 'commonjs2' : undefined,
 	},
@@ -184,7 +186,7 @@ const getConfig = (target) => ({
 			patterns: [{ from: './src/public', to: DIST_PATH },],
 		}),
 		new MiniCssExtractPlugin({
-			filename: '[name].[contenthash:8].css'
+			// filename: '[name].[contenthash:8].css'
 		}),
 		new webpack.ProvidePlugin({
 			process: 'process/browser',
