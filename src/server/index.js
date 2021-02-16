@@ -10,7 +10,7 @@ import { startServer } from './server';
 
 const numCPUs = cpus().length;
 
-console.log('@@@@@@@@@@@@@@@@@@@@ numCPUs: ', numCPUs)
+//  console.log('@@@@@@@@@@@@@@@@@@@@ numCPUs: ', numCPUs)
 
 if (cluster.isMaster) {
 	[...new Array(numCPUs)].forEach(() => cluster.fork());
