@@ -1,14 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { 
-	useMutation,
-} from '@apollo/client';
-//	import Button from '../Button';
+import React from 'react';
+
 import { Thumbnail, ThumbnailImage } from '../../styles';
 
-
 export const RickAndMortyCharacter = ({ character }) => {
-
-	//  const [toggleDescriptionView, setToggleDescriptionView] = useState(false);
 
 	return (
 		<div className="row-flex">
