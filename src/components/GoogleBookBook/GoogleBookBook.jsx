@@ -51,7 +51,7 @@ export const GoogleBookBook = ({ book }) => {
 						<div>
 							<Button
 								className="btn-light btn-tiny"
-								onClick={() => googleBookModifyFavorite({ variables: { id: book.id, favorite: book.favorite && book.favorite ? false : true }, fetchPolicy: 'no-cache'})}
+								onClick={() => googleBookModifyFavorite({ variables: { id: book.id, favorite: bookFavorite ? false : true }, fetchPolicy: 'no-cache'})}
 								buttonText={`${bookFavorite && bookFavorite ? "Remove from" : "Add to"} Favorites`}
 							/>
 						</div>
