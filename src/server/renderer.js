@@ -119,7 +119,7 @@ export async function get(req, res) {
 			}
 		`,
 		data: {
-			cartItems: ['itemAA', 'itemBB', 'itemCC'],
+			cartItems: ['itemA', 'itemB', 'itemC'],
 		},
 	});
 

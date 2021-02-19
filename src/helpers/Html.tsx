@@ -1,8 +1,5 @@
 import React from 'react';
 
-// array of React `<link>` elements
-// array of React `<script>` elements
-
 type Props = {
 	linkElements: React.ReactElement[];
 	styleElements: React.ReactElement[];
