@@ -42,11 +42,14 @@ export const GET_RICK_AND_MORTY_CHARACTERS = `
 	${fragmentTypeRickAndMortyCharacter}
 `;
 
+// @client
+
 export const GET_GOOGLE_BOOKS = gql`
 	query GetGoogleBooks($after: String, $searchString: String!, $orderBy: String!) {
 		googleBooks(after: $after, searchString: $searchString, orderBy: $orderBy) {
 			cursor
 			hasMore
+			lastSearchString
 			books {
 				...fragmentTypeBook
 			}

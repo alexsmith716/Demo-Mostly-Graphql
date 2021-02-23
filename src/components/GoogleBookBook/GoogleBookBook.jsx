@@ -40,7 +40,7 @@ export const GoogleBookBook = ({ book }) => {
 
 				<Thumbnail>
 					<div className="text-center">
-						{ book.smallThumbnail
+						{book.smallThumbnail
 							?
 							<div>
 								<ThumbnailImage src={upgradeThumbnailURL(book.smallThumbnail)} alt={book.title}/>
@@ -52,7 +52,7 @@ export const GoogleBookBook = ({ book }) => {
 							<Button
 								className="btn-light btn-tiny"
 								onClick={() => googleBookModifyFavorite({ variables: { id: book.id, favorite: bookFavorite ? false : true }, fetchPolicy: 'no-cache'})}
-								buttonText={`${bookFavorite && bookFavorite ? "Remove from" : "Add to"} Favorites`}
+								buttonText={`${bookFavorite ? "Remove from" : "Add to"} Favorites`}
 							/>
 						</div>
 					</div>
