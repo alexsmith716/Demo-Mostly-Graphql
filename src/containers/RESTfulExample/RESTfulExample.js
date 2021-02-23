@@ -89,19 +89,33 @@ const RESTfulExample = () => {
 	);
 
 	useEffect(() => {
+		if (!skipGoogleBooksUseQuery) {
+			// console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > useEffect() > skipGoogleBooksUseQuery 111111: ', skipGoogleBooksUseQuery);
+		}
+		if (skipGoogleBooksUseQuery) {
+			// console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > useEffect() > skipGoogleBooksUseQuery 222222: ', skipGoogleBooksUseQuery);
+		}
+
 		if (!googleBooksReadCacheDATA) {
+			// console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > useEffect() > googleBooksReadCacheDATA 111111: ', googleBooksReadCacheDATA);
 			setGoogleBooksReadCacheDATA(client.readQuery({ query: gql`${GET_GOOGLE_BOOKS}` }));
 		}
 		if (googleBooksReadCacheDATA) {
+			// console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > useEffect() > googleBooksReadCacheDATA 222222: ', googleBooksReadCacheDATA);
 			const search = googleBooksReadCacheDATA?.googleBooks?.lastSearchString;
 			setLastSearch(search);
 		}
+
 		if (lastSearch !== '') {
+			//console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > useEffect() > lastSearch 111111: ', lastSearch);
 			if (!googleBooksUseQueryDATA) {
-				setGoogleBookUseQuerySearch('kaplan test prep')
+				// console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > useEffect() > googleBooksUseQueryDATA 111111: ', googleBooksUseQueryDATA);
+				setGoogleBookUseQuerySearch(lastSearch);
 			}
 		}
+
 		if (googleBookUseQuerySearch) {
+			// console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > useEffect() > googleBookUseQuerySearch 11111: ', googleBookUseQuerySearch);
 			setSkipGoogleBooksUseQuery(false);
 		}
 
@@ -109,7 +123,7 @@ const RESTfulExample = () => {
 			setClientExtract(client.extract());
 		}
 		},
-		[toggleCacheView, googleBookUseQuerySearch, googleBooksUseQueryDATA, googleBooksReadCacheDATA, lastSearch,]
+		[skipGoogleBooksUseQuery, googleBooksReadCacheDATA, lastSearch, toggleCacheView, googleBooksUseQueryDATA, googleBookUseQuerySearch,]
 	);
 
 	return (
@@ -225,8 +239,9 @@ const RESTfulExample = () => {
 							type="button"
 							className="btn-success btn-md"
 							// onClick={() => getGoogleBooks({ variables: { searchString: 'kaplan test prep' },})}
+							// onClick={() => setGoogleBookSearch('kaplan test prep')}
 							onClick={() => setGoogleBookUseQuerySearch('kaplan test prep')}
-							buttonText="Search Kaplan!!!!"
+							buttonText="Search Kaplan"
 						/>
 					</div>
 
@@ -235,8 +250,8 @@ const RESTfulExample = () => {
 							type="button"
 							className="btn-success btn-md"
 							// onClick={() => getGoogleBooks({ variables: { searchString: 'gmat' },})}
-							onClick={() => setGoogleBookUseQuerySearch('usmle')}
-							buttonText="Search USMLE"
+							onClick={() => setGoogleBookUseQuerySearch('kaplan asvab')}
+							buttonText="Search ASVAB"
 						/>
 					</div>
 
@@ -245,8 +260,8 @@ const RESTfulExample = () => {
 							type="button"
 							className="btn-success btn-md"
 							// onClick={() => getGoogleBooks({ variables: { searchString: 'lsat' },})}
-							onClick={() => setGoogleBookUseQuerySearch('lsat')}
-							buttonText="Search LSAT!"
+							onClick={() => setGoogleBookUseQuerySearch('kaplan psat')}
+							buttonText="Search PSAT"
 						/>
 					</div>
 
