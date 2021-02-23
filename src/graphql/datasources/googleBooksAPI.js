@@ -12,6 +12,7 @@ export class GoogleBooksAPI extends RESTDataSource {
 		return {
 			id: book.id,
 			cursor: `${book.id}`,
+      lastSearchString: '',
 			title: book.volumeInfo.title,
 			authors: book.volumeInfo.authors,
 			publisher: book.volumeInfo.publisher,

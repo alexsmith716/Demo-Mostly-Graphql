@@ -38,12 +38,13 @@ export const resolvers = {
 				const books = paginateResults({ after, pageSize, results: allGoogleBooks });
 
 				return {
-					books,
 					cursor: books.length ? books[books.length - 1].cursor : null,
 					hasMore: books.length
 						? books[books.length - 1].cursor !==
 							allGoogleBooks[allGoogleBooks.length - 1].cursor
 						: false,
+          lastSearchString: searchString,
+          books,
 				};
 			} catch (error) {
 				console.error('>>>>>>>>>>>>> RESOLVERS > Query > googleBooks > ERROR: ', error);

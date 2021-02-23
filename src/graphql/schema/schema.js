@@ -44,6 +44,7 @@ export const typeDefs = gql`
 	type GoogleBookConnection {
 		cursor: String!
 		hasMore: Boolean!
+    lastSearchString: String
 		books: [Book]!
 	}
 

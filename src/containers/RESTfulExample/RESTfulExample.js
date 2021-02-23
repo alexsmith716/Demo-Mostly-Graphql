@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { 
 	useLazyQuery,
+	useQuery,
 	useApolloClient,
 	NetworkStatus,
+	gql,
 } from '@apollo/client';
 
 import Button from '../../components/Button';
@@ -16,28 +18,41 @@ const RESTfulExample = () => {
 	const [clientExtract, setClientExtract] = useState(null);
 	const [googleBookSearch, setGoogleBookSearch] = useState('');
 	const [toggleCacheView, setToggleCacheView] = useState(false);
+	const [skipGoogleBooksUseQuery, setSkipGoogleBooksUseQuery] = useState(true);
+
+	const [googleBooksReadCacheDATA, setGoogleBooksReadCacheDATA] = useState(null);
+	const [googleBooksLastSearchString, setGoogleBooksLastSearchString] = useState('');
+	const [googleBookUseQuerySearch, setGoogleBookUseQuerySearch] = useState('');
+	const [lastSearch, setLastSearch] = useState('');
+
+	const [firstLoad, setFirstLoad] = useState(false);
 
 	const client = useApolloClient();
 
-	const [getGoogleBooks, {
-			loading, 
-			error,
-			data: googleBooksData,
-			previousData: googleBooksPreviousData,
-			refetch,
-			fetchMore,
-			networkStatus,
-		}] = useLazyQuery(
-			GET_GOOGLE_BOOKS,
-			{
-				variables: {
-					orderBy: 'newest',
-				},
-				fetchPolicy: 'cache-and-network',
-				nextFetchPolicy: 'cache-first',
-				notifyOnNetworkStatusChange: true,
-			}
-	);
+	//	const [getGoogleBooks, {
+	//			called,
+	//			loading, 
+	//			error,
+	//			data: googleBooksData,
+	//			previousData: googleBooksPreviousData,
+	//			refetch,
+	//			fetchMore,
+	//			networkStatus,
+	//		}] = useLazyQuery(
+	//			GET_GOOGLE_BOOKS,
+	//			{
+	//				variables: {
+	//					searchString: `${googleBookSearch}`,
+	//					orderBy: 'newest',
+	//				},
+	//				fetchPolicy: 'cache-and-network',
+	//				nextFetchPolicy: 'cache-first',
+	//				notifyOnNetworkStatusChange: true,
+	//				onCompleted: () => {
+	//					setFirstLoad(true);
+	//				}
+	//			}
+	//	);
 
 	const [getGoogleBook, {
 			loading: googleBookLoading, 
@@ -47,26 +62,55 @@ const RESTfulExample = () => {
 			GET_GOOGLE_BOOK,
 	);
 
-	useEffect(() => {
-			if (googleBooksData) {
-				console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > useEffect() > googleBooksData: ', googleBooksData);
+	//	@client directive: query and update cache
+
+	const {
+			called,
+			loading,
+			error,
+			data: googleBooksUseQueryDATA,
+			fetchMore: fetchMore,
+			networkStatus,
+		} = useQuery(
+			GET_GOOGLE_BOOKS,
+			{
+				variables: {
+					searchString: `${googleBookUseQuerySearch}`,
+					orderBy: 'newest',
+				},
+				// fetchPolicy: 'cache-and-network',
+				// nextFetchPolicy: 'cache-first',
+				notifyOnNetworkStatusChange: true,
+				skip: skipGoogleBooksUseQuery,
+				onCompleted: () => {
+					setSkipGoogleBooksUseQuery(true);
+				}
 			}
-			if (googleBookSearch) {
-				console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > useEffect() > googleBookSearch: ', googleBookSearch);
-			}
-			if (googleBookData) {
-				console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > useEffect() > googleBookData: ', googleBookData);
-			}
-			if (toggleCacheView) {
-				setClientExtract(client.extract());
-			}
-		},
-		[googleBooksData, googleBookSearch, googleBookData, toggleCacheView,]
 	);
 
-	const viewCacheChangeHandler = e => {
-		setToggleCacheView(!toggleCacheView);
-	};
+	useEffect(() => {
+		if (!googleBooksReadCacheDATA) {
+			setGoogleBooksReadCacheDATA(client.readQuery({ query: gql`${GET_GOOGLE_BOOKS}` }));
+		}
+		if (googleBooksReadCacheDATA) {
+			const search = googleBooksReadCacheDATA?.googleBooks?.lastSearchString;
+			setLastSearch(search);
+		}
+		if (lastSearch !== '') {
+			if (!googleBooksUseQueryDATA) {
+				setGoogleBookUseQuerySearch('kaplan test prep')
+			}
+		}
+		if (googleBookUseQuerySearch) {
+			setSkipGoogleBooksUseQuery(false);
+		}
+
+		if (toggleCacheView) {
+			setClientExtract(client.extract());
+		}
+		},
+		[toggleCacheView, googleBookUseQuerySearch, googleBooksUseQueryDATA, googleBooksReadCacheDATA, lastSearch,]
+	);
 
 	return (
 		<>
@@ -118,9 +162,9 @@ const RESTfulExample = () => {
 							</p>
 						)}
 
-						{googleBooksData && (
+						{googleBooksUseQueryDATA && (
 							<div>
-								{googleBooksData.googleBooks.books.map((book, index) => (
+								{googleBooksUseQueryDATA.googleBooks.books.map((book, index) => (
 									<div key={index} className="mb-3 container-padding-border-radius-2">
 										<GoogleBookBook book={ book } />
 									</div>
@@ -156,7 +200,7 @@ const RESTfulExample = () => {
 						/>
 					</div>
 
-					{googleBooksData && (
+					{googleBooksUseQueryDATA && (
 						<div className="mb-3">
 							<Button
 								type="button"
@@ -180,8 +224,9 @@ const RESTfulExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => getGoogleBooks({ variables: { searchString: 'kaplan test prep' },})}
-							buttonText="Search Kaplan"
+							// onClick={() => getGoogleBooks({ variables: { searchString: 'kaplan test prep' },})}
+							onClick={() => setGoogleBookUseQuerySearch('kaplan test prep')}
+							buttonText="Search Kaplan!!!!"
 						/>
 					</div>
 
@@ -189,8 +234,9 @@ const RESTfulExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => getGoogleBooks({ variables: { searchString: 'gmat' },})}
-							buttonText="Search GMAT"
+							// onClick={() => getGoogleBooks({ variables: { searchString: 'gmat' },})}
+							onClick={() => setGoogleBookUseQuerySearch('usmle')}
+							buttonText="Search USMLE"
 						/>
 					</div>
 
@@ -198,8 +244,9 @@ const RESTfulExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => getGoogleBooks({ variables: { searchString: 'lsat' },})}
-							buttonText="Search LSAT"
+							// onClick={() => getGoogleBooks({ variables: { searchString: 'lsat' },})}
+							onClick={() => setGoogleBookUseQuerySearch('lsat')}
+							buttonText="Search LSAT!"
 						/>
 					</div>
 
@@ -222,12 +269,13 @@ const RESTfulExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => getGoogleBooks({ variables: { searchString: googleBookSearch },})}
+							onClick={() => getGoogleBooks()}
+							//	onClick={() => getGoogleBooks({ variables: { searchString: googleBookSearch },})}
 							buttonText="Get Google Books"
 						/>
 					</div>
 
-					{googleBooksData && (
+					{googleBooksUseQueryDATA && (
 						<div className="mb-3">
 							<Button
 								type="button"
@@ -235,7 +283,7 @@ const RESTfulExample = () => {
 								onClick={ async () => {
 									await fetchMore({
 										variables: {
-											after: googleBooksData.googleBooks.cursor,
+											after: googleBooksUseQueryDATA.googleBooks.cursor,
 										},
 									});
 								}}
