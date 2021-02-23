@@ -7,4 +7,4 @@
 
 ### TODO:
 
-* Fix GoogleBookBook: `setBookFavorite` toggle to `false` has issue
+* Refactor GoogleBookBook: `setBookFavorite` toggle will read and write to the cache
