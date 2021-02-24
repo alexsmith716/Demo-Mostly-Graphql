@@ -34,6 +34,7 @@ export const resolvers = {
 
 		googleBooks: async (obj, { after, searchString, orderBy, pageSize = 2, }, { dataSources }) => {
 			try {
+        console.error('>>>>>>>>>>>>> RESOLVERS > Query > googleBooks > searchString ++++++++++++++++++++++++: ', searchString);
 				const allGoogleBooks = await dataSources.googleBooks.getBooks(searchString, orderBy);
 				const books = paginateResults({ after, pageSize, results: allGoogleBooks });
 
