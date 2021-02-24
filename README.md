@@ -5,9 +5,11 @@
 * This demo is mostly about graphql. 
 
 
-### TODO:
+### TODO (trying to figure out):
+* Feature RESTfulExample: useEffect `setGoogleBookUseQuerySearch` will affect `searchString` of `useQuery` googleBooks via query-result `refetch`
 
-* Feature RESTfulExample: useEffect `setGoogleBookUseQuerySearch` will affect `searchString` of `useQuery` googleBook via query-result `refetch`
+
+### TODO (know how to fix):
 * Refactor GoogleBookBook: `setBookFavorite` toggle will read and write to the cache
 
 
