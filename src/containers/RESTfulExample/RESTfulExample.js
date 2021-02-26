@@ -16,13 +16,11 @@ import { GET_GOOGLE_BOOKS, GET_GOOGLE_BOOK } from '../../graphql/queries/queries
 const RESTfulExample = () => {
 
 	const [clientExtract, setClientExtract] = useState(null);
-	const [googleBooksSearch, setGoogleBooksSearch] = useState('');
+	const [googleBooksSearch, setGoogleBooksSearch] = useState(null);
 	const [googleBooksSearchInput, setGoogleBooksSearchInput] = useState('');
 	const [toggleCacheView, setToggleCacheView] = useState(false);
-	// -----------------
 	const [googleBooksReadCacheDATA, setGoogleBooksReadCacheDATA] = useState(null);
-	const [googleBooksLastSearchString, setGoogleBooksLastSearchString] = useState('');
-	const [lastSearch, setLastSearch] = useState('');
+	const [lastSearch, setLastSearch] = useState(null);
 
 	const client = useApolloClient();
 
@@ -63,7 +61,6 @@ const RESTfulExample = () => {
 			GET_GOOGLE_BOOK,
 	);
 
-	// BELOW NEEDS CLEANING UP...
 	useEffect(() => {
 			if (!googleBooksReadCacheDATA) {
 				setGoogleBooksReadCacheDATA(client.readQuery({ query: gql`${GET_GOOGLE_BOOKS}` }));
@@ -71,7 +68,7 @@ const RESTfulExample = () => {
 			if (googleBooksReadCacheDATA) {
 				const search = googleBooksReadCacheDATA?.googleBooks?.lastSearchString;
 
-				if (googleBooksSearch !== '') {
+				if (googleBooksSearch) {
 					if (googleBooksSearch !== search) {
 						setLastSearch(googleBooksSearch);
 					} else {
@@ -82,26 +79,25 @@ const RESTfulExample = () => {
 				}
 			}
 
-			if (lastSearch !== '') {
+			if (lastSearch) {
 				if (!googleBooksDATA) {
 					setGoogleBooksSearch(lastSearch);
 				}
 			}
 
 			if (googleBooksSearch) {
-				if (lastSearch !== '') {
+				if (lastSearch) {
 					if (!googleBooksDATA) {
 						getGoogleBooks({ variables: { searchString: googleBooksSearch },})
 					}
 					if (googleBooksSearch !== lastSearch) {
 						refetch({ searchString: googleBooksSearch });
 					}
-				}
-
-				if (lastSearch === '') {
+				} else {
 					getGoogleBooks({ variables: { searchString: googleBooksSearch },})
 				}
 			}
+
 			if (toggleCacheView) {
 				setClientExtract(client.extract());
 			}
@@ -221,8 +217,8 @@ const RESTfulExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => setGoogleBooksSearch('kaplan test prep')}
-							buttonText="Search Kaplan"
+							onClick={() => setGoogleBooksSearch('kaplan usmle')}
+							buttonText="Search USMLE"
 						/>
 					</div>
 
@@ -230,8 +226,8 @@ const RESTfulExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => setGoogleBooksSearch('asvab')}
-							buttonText="Search ASVAB"
+							onClick={() => setGoogleBooksSearch('kaplan mcat')}
+							buttonText="Search MCAT"
 						/>
 					</div>
 
@@ -239,8 +235,8 @@ const RESTfulExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => setGoogleBooksSearch('pcat')}
-							buttonText="Search PCAT"
+							onClick={() => setGoogleBooksSearch('kaplan lsat')}
+							buttonText="Search LSAT"
 						/>
 					</div>
 

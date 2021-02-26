@@ -6,7 +6,6 @@
 
 
 ### TODO (trying to figure out):
-* Feature RESTfulExample: useEffect `setGoogleBookUseQuerySearch` will affect `searchString` of `useQuery` googleBooks via query-result `refetch`
 
 
 ### TODO (know how to fix):
@@ -15,4 +14,3 @@
 
 ### Comments
 
-* Will solve this but it's tough figuring. Docs are OK but alot of trial-and-error and testing it all.
