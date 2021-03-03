@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-	useMutation,
+import {
+	useApolloClient,
 } from '@apollo/client';
+
 import Button from '../Button';
 import { Thumbnail, ThumbnailImage } from '../../styles';
-import { GOOGLE_BOOK_MODIFY_FAVORITE } from '../../graphql/mutations/mutations.js';
+import { READ_BOOK_FAVORITE } from '../../graphql/queries/queries.js';
 
 export const GoogleBookBook = ({ book }) => {
 
 	const [toggleDescriptionView, setToggleDescriptionView] = useState(false);
-	const [bookFavorite, setBookFavorite] = useState(false);
+	const [readBookFavorite, setReadBookFavorite] = useState(null);
 
-	const [googleBookModifyFavorite, {
-			error: googleBookModifyFavoriteERROR,
-			data: googleBookModifyFavoriteDATA,
-		}] = useMutation(
-			GOOGLE_BOOK_MODIFY_FAVORITE,
-	);
+	const client = useApolloClient();
 
 	const upgradeThumbnailURL = (url) => {
 		const upgrade = url.replace(/^http:\/\//i, 'https://');
@@ -24,13 +20,21 @@ export const GoogleBookBook = ({ book }) => {
 	};
 
 	useEffect(() => {
-			if (googleBookModifyFavoriteDATA) {
-				const { googleBookModifyFavorite: { book }} = googleBookModifyFavoriteDATA;
-				//  const bookFav = googleBookModifyFavoriteDATA?.googleBookModifyFavorite?.book?.favorite;
-				setBookFavorite(book.favorite)
+			if (readBookFavorite) {
+				const { googleBooks: { favorite }} = readBookFavorite;
+
+				client.cache.modify({
+					id: client.cache.identify(readBookFavorite.googleBooks),
+					fields: {
+						favorite(cachedName) {
+							return !favorite;
+						},
+					},
+					broadcast: true // default
+				});
 			}
 		},
-		[googleBookModifyFavoriteDATA,]
+		[readBookFavorite,]
 	);
 
 	return (
@@ -51,8 +55,8 @@ export const GoogleBookBook = ({ book }) => {
 						<div>
 							<Button
 								className="btn-light btn-tiny"
-								onClick={() => googleBookModifyFavorite({ variables: { id: book.id, favorite: bookFavorite ? false : true }, fetchPolicy: 'no-cache'})}
-								buttonText={`${bookFavorite ? "Remove from" : "Add to"} Favorites`}
+								onClick={() => setReadBookFavorite(client.readQuery({ query: READ_BOOK_FAVORITE, variables: { id: `${book.id}` }}))}
+								buttonText={`${book.favorite ? "Remove from" : "Add to"} Favorites`}
 							/>
 						</div>
 					</div>
@@ -71,7 +75,7 @@ export const GoogleBookBook = ({ book }) => {
 
 				<div><b>ID:&nbsp;</b>{book.id ? book.id : <i>n/a</i>}</div>
 
-				<div><b>Favorite:&nbsp;</b>{bookFavorite && bookFavorite ? <i>true</i> : <i>false</i>}</div>
+				<div><b>Favorite:&nbsp;</b>{book.favorite ? <i>true</i> : <i>false</i>}</div>
 
 				{book.description &&
 					<>
