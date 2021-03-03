@@ -58,6 +58,15 @@ export const GET_GOOGLE_BOOKS = gql`
 	${fragmentTypeBook}
 `;
 
+export const READ_BOOK_FAVORITE = gql`
+  query ReadBookFavorite($id: ID!) {
+    googleBooks(id: $id) {
+      id
+      favorite
+    }
+  }
+`;
+
 export const GET_GOOGLE_BOOK = gql`
 	query GetGoogleBook($id: ID!) {
 		googleBook(id: $id) {

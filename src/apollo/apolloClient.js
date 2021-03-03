@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloLink } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
-//	import fetch from 'node-fetch';
+//  import fetch from 'node-fetch';
 import fetch from 'isomorphic-fetch';
 
 export default function apolloClient({ uri, ssrMode = false }) {
@@ -13,12 +13,12 @@ export default function apolloClient({ uri, ssrMode = false }) {
 
 	const errorLink = onError(({ operation, response, graphQLErrors, networkError, forward }) => {
 		if (graphQLErrors) {
-			//	for (let err of graphQLErrors) {
-			//		switch (err.extensions.code) {
-			//			case 'ENOTFOUND':
-			//				return null;
-			//		}
-			//	}
+			//  for (let err of graphQLErrors) {
+			//    switch (err.extensions.code) {
+			//      case 'ENOTFOUND':
+			//        return null;
+			//    }
+			//  }
 			graphQLErrors.map(({ message, locations, path }) =>
 				console.log(`>>>> apolloClient > [GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,),
 			);
@@ -28,9 +28,9 @@ export default function apolloClient({ uri, ssrMode = false }) {
 			console.log(`>>>> apolloClient > [Network error]: ${networkError}`);
 		}
 
-		//	if (operation.operationName === "IgnoreErrorsQuery") {
-		//		response.errors = null;
-		//	}
+		//  if (operation.operationName === "IgnoreErrorsQuery") {
+		//    response.errors = null;
+		//  }
 	});
 
 	const link = ApolloLink.from([
@@ -45,9 +45,13 @@ export default function apolloClient({ uri, ssrMode = false }) {
 					// --------------------------------------
 					googleBooks: {
 						keyArgs: false,
-						//	read(existing, options) {
-						//		return existing ? existing : undefined;
-						//	},
+						read(existing, { args, readField }) {
+							if (!existing) return;
+							if (args && args.id) {
+								return existing.books.find(books => args.id === readField('id', books));
+							}
+							return existing;
+						},
 						merge(existing, incoming) {
 							let books = [];
 							if (existing && existing.books) {
@@ -72,7 +76,7 @@ export default function apolloClient({ uri, ssrMode = false }) {
 							const page = args && args['page'];
 
 							//  if (page === 1) {
-							//  	return incoming;
+							//    return incoming;
 							//  }
 
 							let results = [];
@@ -82,10 +86,10 @@ export default function apolloClient({ uri, ssrMode = false }) {
 							}
 
 							if (incoming && incoming.results) {
-								//	const newItems = incoming.results.filter(
-								//		(i) => !results.map((r) => r['__ref']).includes(i['__ref']),
-								//	);
-								//	results = results.concat(newItems);
+								//  const newItems = incoming.results.filter(
+								//    (i) => !results.map((r) => r['__ref']).includes(i['__ref']),
+								//  );
+								//  results = results.concat(newItems);
 								results = results.concat(incoming.results);
 							}
 							return {
@@ -95,9 +99,9 @@ export default function apolloClient({ uri, ssrMode = false }) {
 						},
 					},
 					// --------------------------------------
-					//	charactersByIds: {
-					//		keyArgs: false,
-					//	}
+					//  charactersByIds: {
+					//    keyArgs: false,
+					//  }
 					// --------------------------------------
 				}
 			}
@@ -110,20 +114,20 @@ export default function apolloClient({ uri, ssrMode = false }) {
 		cache = cache.restore(window.__APOLLO_STATE__);
 	}
 
-	//	* none: 	the default policy
-	//							Any GraphQL Errors are treated the same as network errors and any data is ignored from the response
+	//  * none:   the default policy
+	//              Any GraphQL Errors are treated the same as network errors and any data is ignored from the response
 
-	//	* ignore: allows to read any data that is returned alongside GraphQL Errors,
-	//							but doesn't save the errors or report them to UI
+	//  * ignore: allows to read any data that is returned alongside GraphQL Errors,
+	//              but doesn't save the errors or report them to UI
 
-	//	* all: 		the best way to notify users of potential issues while still showing as much data as possible from server
-	//							It saves both data and errors so UI can use them
+	//  * all:    the best way to notify users of potential issues while still showing as much data as possible from server
+	//              It saves both data and errors so UI can use them
 	// -----------------------------------------------------------
 	return new ApolloClient({
 		link,
 		cache,
 		ssrMode,
-		//	queryDeduplication: false,
+		//  queryDeduplication: false,
 		defaultOptions: {
 			watchQuery: {
 				// fetchPolicy: 'cache-and-network',
