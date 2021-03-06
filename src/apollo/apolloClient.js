@@ -1,9 +1,15 @@
-import { ApolloClient, InMemoryCache, createHttpLink, ApolloLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, makeVar, createHttpLink, ApolloLink } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 //  import fetch from 'node-fetch';
 import fetch from 'isomorphic-fetch';
 
-export default function apolloClient({ uri, ssrMode = false }) {
+const charactersLastSearchStringInit = {
+	lastSearchString: '',
+};
+
+export const charactersLastSearchStringVar = makeVar(charactersLastSearchStringInit);
+
+export function apolloClient({ uri, ssrMode = false }) {
 
 	const httpLink = createHttpLink({
 		uri: uri,
@@ -42,6 +48,11 @@ export default function apolloClient({ uri, ssrMode = false }) {
 		typePolicies: {
 			Query: {
 				fields: {
+					charactersLastSearchString: {
+						read() {
+							return charactersLastSearchStringVar();
+						},
+					},
 					// --------------------------------------
 					googleBooks: {
 						keyArgs: false,
