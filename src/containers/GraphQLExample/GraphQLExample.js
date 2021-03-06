@@ -1,18 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { 
+import {
+	useQuery,
 	useLazyQuery,
 	useApolloClient,
+	// useReactiveVar,
 	NetworkStatus,
 	gql,
 } from '@apollo/client';
 
+import { characterLastSearchStringVar } from '../../apollo/apolloClient';
 import { Loading } from '../../components/Loading';
 import Button from '../../components/Button';
 import { RickAndMortyCharacter } from '../../components/RickAndMortyCharacter';
-import { GET_RICK_AND_MORTY_CHARACTERS, } from '../../graphql/queries/queries.js';
+import { GET_RICK_AND_MORTY_CHARACTERS, GET_CHARACTERS_LAST_SEARCH_STRING } from '../../graphql/queries/queries.js';
+import { reactiveVariableMutations } from '../../graphql/operations/mutations'
 
 const GraphQLExample = () => {
+
+	const { setCharactersLastSearchStringVar } = reactiveVariableMutations;
 
 	//  const [errorMessage, setErrorMessage] = useState(null);
 	const inputElement = useRef(null);
@@ -22,10 +28,21 @@ const GraphQLExample = () => {
 	const [rickAndMortyCharactersCurrentPage, setRickAndMortyCharactersCurrentPage] = useState(null);
 	const [rickAndMortyResults, setRickAndMortyResults] = useState(false);
 	const [toggleCacheView, setToggleCacheView] = useState(false);
+	// const lastSearchStringReactiveVar = useReactiveVar(charactersLastSearchStringVar);
 
 	const client = useApolloClient();
 
-	//  =====================================================================
+	const {
+			loading: lastSearchStringLOADING, 
+			error: lastSearchStringERROR,
+			data: lastSearchStringDATA,
+		} = useQuery(
+			GET_CHARACTERS_LAST_SEARCH_STRING
+	);
+
+	const onCompleted = () => {
+		console.log('>>>>>>>>>>>>>>>>>>>>>>>> GraphQLExample > QUERY > Completed ++++++++++++++++++++');
+	};
 
 	const variables = {
 		filter: { name: `${rickAndMortyCharactersFilterName}`},
@@ -36,21 +53,24 @@ const GraphQLExample = () => {
 			error: rickAndMortyCharactersError,
 			data: rickAndMortyCharactersData,
 			previousData,
+			refetch,
 			fetchMore,
 			networkStatus,
 		}] = useLazyQuery(
 			gql`${GET_RICK_AND_MORTY_CHARACTERS}`,
 			{
-				fetchPolicy: 'cache-and-network',
-				nextFetchPolicy: 'cache-first',
+				//  fetchPolicy: 'cache-and-network',
+				//  nextFetchPolicy: 'cache-first',
 				//  variables,
 				notifyOnNetworkStatusChange: true,
+				onCompleted,
 			}
 	);
 
 	//  =====================================================================
 
 	useEffect(() => {
+			// console.log('>>>>>>>>>>>>>>>>>>>>>>>> GraphQLExample > lastSearchStringReactiveVar: ', lastSearchStringReactiveVar);
 			if (rickAndMortyCharactersData) {
 				const { characters: { info }} = rickAndMortyCharactersData;
 				const { characters: { results }} = rickAndMortyCharactersData;
@@ -67,17 +87,17 @@ const GraphQLExample = () => {
 				if (results.length > 0) {
 					setRickAndMortyResults(true);
 				}
-				if (toggleCacheView) {
-					setClientExtract(client.extract());
-				}
+			}
+			if (toggleCacheView) {
+				setClientExtract(client.extract());
+			}
+			if (lastSearchStringDATA) {
+				const { charactersLastSearchString: { lastSearchString }} = lastSearchStringDATA;
+				console.log('>>>>>>>>>>>>>>>>>>>>>>>> GraphQLExample > lastSearchString!!!!!: ', lastSearchString);
 			}
 		},
-		[rickAndMortyCharactersData, rickAndMortyCharactersFilterName, toggleCacheView]
+		[rickAndMortyCharactersData, lastSearchStringDATA, toggleCacheView]
 	);
-
-	const viewCacheChangeHandler = e => {
-		setToggleCacheView(!toggleCacheView);
-	};
 
 	return (
 		<>
@@ -142,6 +162,15 @@ const GraphQLExample = () => {
 							className="btn-success btn-md"
 							onClick={() => setToggleCacheView(!toggleCacheView)}
 							buttonText={!clientExtract ? "View Apollo Cache" : "Toggle Cache View"}
+						/>
+					</div>
+
+					<div className="mb-3">
+						<Button
+							type="button"
+							className="btn-success btn-md"
+							onClick={() => setCharactersLastSearchStringVar({lastSearchString: 'Morty'})}
+							buttonText={"Test Reactive var"}
 						/>
 					</div>
 
@@ -217,7 +246,6 @@ const GraphQLExample = () => {
 							/>
 						</div>
 					)}
-
 				</div>
 			</div>
 		</>

@@ -42,7 +42,13 @@ export const GET_RICK_AND_MORTY_CHARACTERS = `
 	${fragmentTypeRickAndMortyCharacter}
 `;
 
-// @client
+export const GET_CHARACTERS_LAST_SEARCH_STRING = gql`
+	query GetCharactersLastSearchString {
+		charactersLastSearchString @client {
+			lastSearchString
+		}
+	}
+`;
 
 export const GET_GOOGLE_BOOKS = gql`
 	query GetGoogleBooks($after: String, $searchString: String!, $orderBy: String!) {
@@ -59,12 +65,12 @@ export const GET_GOOGLE_BOOKS = gql`
 `;
 
 export const READ_BOOK_FAVORITE = gql`
-  query ReadBookFavorite($id: ID!) {
-    googleBooks(id: $id) {
-      id
-      favorite
-    }
-  }
+	query ReadBookFavorite($id: ID!) {
+		googleBooks(id: $id) {
+			id
+			favorite
+		}
+	}
 `;
 
 export const GET_GOOGLE_BOOK = gql`

@@ -11,7 +11,7 @@ import { ServerStyleSheet } from 'styled-components';
 import { ApolloProvider, gql } from '@apollo/client';
 import { getDataFromTree } from '@apollo/client/react/ssr';
 
-import apolloClient from '../apollo/apolloClient';
+import { apolloClient } from '../apollo/apolloClient';
 import asyncGetPromises from '../utils/asyncGetPromises';
 import routes from '../client/routes';
 import configureStore from '../redux/configureStore';
