@@ -3,9 +3,15 @@ import { onError } from '@apollo/client/link/error';
 //  import fetch from 'node-fetch';
 import fetch from 'isomorphic-fetch';
 
-const charactersLastSearchStringInit = {
+const googleBooksLastSearchStringInit = {
 	lastSearchString: '',
 };
+
+const charactersLastSearchStringInit = {
+	lastSearchString: null,
+};
+
+export const googleBooksLastSearchStringVar = makeVar(googleBooksLastSearchStringInit);
 
 export const charactersLastSearchStringVar = makeVar(charactersLastSearchStringInit);
 
@@ -48,6 +54,11 @@ export function apolloClient({ uri, ssrMode = false }) {
 		typePolicies: {
 			Query: {
 				fields: {
+					googleBooksLastSearchString: {
+						read() {
+							return googleBooksLastSearchStringVar();
+						},
+					},
 					charactersLastSearchString: {
 						read() {
 							return charactersLastSearchStringVar();

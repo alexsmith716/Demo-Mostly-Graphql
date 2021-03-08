@@ -5,32 +5,43 @@ import {
 	useLazyQuery,
 	useApolloClient,
 	NetworkStatus,
+	useReactiveVar,
 	gql,
 } from '@apollo/client';
 
 import Button from '../../components/Button';
 import { GoogleBookBook, } from '../../components/GoogleBookBook';
-import { GET_GOOGLE_BOOKS, GET_GOOGLE_BOOK } from '../../graphql/queries/queries.js';
+import { GET_GOOGLE_BOOKS, GET_GOOGLE_BOOK, GET_GOOGLE_BOOKS_LAST_SEARCH_STRING } from '../../graphql/queries/queries.js';
+import { reactiveVariableMutations } from '../../graphql/operations/mutations';
+import { googleBooksLastSearchStringVar } from '../../apollo/apolloClient';
 
 
 const RESTfulExample = () => {
 
+	const client = useApolloClient();
+	const { setGoogleBooksLastSearchStringVar } = reactiveVariableMutations;
+
 	const [clientExtract, setClientExtract] = useState(null);
-	const [googleBooksSearch, setGoogleBooksSearch] = useState(null);
 	const [googleBooksSearchInput, setGoogleBooksSearchInput] = useState('');
 	const [toggleCacheView, setToggleCacheView] = useState(false);
-	const [googleBooksReadCacheDATA, setGoogleBooksReadCacheDATA] = useState(null);
-	const [lastSearch, setLastSearch] = useState(null);
+	const googleBooksLastSearchString = useReactiveVar(googleBooksLastSearchStringVar);
 
-	const client = useApolloClient();
+	const {
+			loading: lastSearchStringLOADING, 
+			error: lastSearchStringERROR,
+			data: lastSearchStringDATA,
+		} = useQuery(
+			GET_GOOGLE_BOOKS_LAST_SEARCH_STRING,
+	);
+
+	//  const [getLastSearchString, {
+	//      data: lastSearchStringDATAZ,
+	//    }] = useLazyQuery(
+	//      GET_GOOGLE_BOOKS_LAST_SEARCH_STRING
+	//  );
 
 	const onCompleted = () => {
 		console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > QUERY > Completed ++++++++++++++++++++');
-	};
-
-	const variables = {
-		searchString: googleBooksSearch,
-		orderBy: 'newest',
 	};
 
 	const [getGoogleBooks, {
@@ -44,12 +55,13 @@ const RESTfulExample = () => {
 		}] = useLazyQuery(
 			GET_GOOGLE_BOOKS,
 			{
-				variables,
-				//	fetchPolicy: 'cache-and-network',
-				//	nextFetchPolicy: 'cache-first',
+				variables: {
+					orderBy: 'newest',
+				},
+				//  fetchPolicy: 'cache-and-network',
+				//  nextFetchPolicy: 'cache-first',
 				notifyOnNetworkStatusChange: true,
 				onCompleted,
-				//	partialRefetch,
 			}
 	);
 
@@ -62,39 +74,14 @@ const RESTfulExample = () => {
 	);
 
 	useEffect(() => {
-			if (!googleBooksReadCacheDATA) {
-				setGoogleBooksReadCacheDATA(client.readQuery({ query: gql`${GET_GOOGLE_BOOKS}` }));
-			}
-			if (googleBooksReadCacheDATA) {
-				const search = googleBooksReadCacheDATA?.googleBooks?.lastSearchString;
-
-				if (googleBooksSearch) {
-					if (googleBooksSearch !== search) {
-						setLastSearch(googleBooksSearch);
-					} else {
-						setLastSearch(search);
-					}
-				} else {
-					setLastSearch(search);
-				}
-			}
-
-			if (lastSearch) {
-				if (!googleBooksDATA) {
-					setGoogleBooksSearch(lastSearch);
-				}
-			}
-
-			if (googleBooksSearch) {
-				if (lastSearch) {
+			if (lastSearchStringDATA) {
+				const { googleBooksLastSearchString: { lastSearchString }} = lastSearchStringDATA;
+				if (lastSearchString !== '') {
 					if (!googleBooksDATA) {
-						getGoogleBooks({ variables: { searchString: googleBooksSearch },})
+						getGoogleBooks({ variables: { searchString: lastSearchString },})
+					} else {
+						refetch({ searchString: lastSearchString });
 					}
-					if (googleBooksSearch !== lastSearch) {
-						refetch({ searchString: googleBooksSearch });
-					}
-				} else {
-					getGoogleBooks({ variables: { searchString: googleBooksSearch },})
 				}
 			}
 
@@ -102,7 +89,7 @@ const RESTfulExample = () => {
 				setClientExtract(client.extract());
 			}
 		},
-		[googleBooksReadCacheDATA, lastSearch, googleBooksDATA, googleBooksSearch, toggleCacheView,]
+		[lastSearchStringDATA, toggleCacheView,]
 	);
 
 	return (
@@ -217,8 +204,8 @@ const RESTfulExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => setGoogleBooksSearch('kaplan usmle')}
-							buttonText="Search USMLE"
+							onClick={() => {console.log(googleBooksLastSearchStringVar())} }
+							buttonText={"Reade RV"}
 						/>
 					</div>
 
@@ -226,8 +213,8 @@ const RESTfulExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => setGoogleBooksSearch('kaplan mcat')}
-							buttonText="Search MCAT"
+							onClick={() => setGoogleBooksLastSearchStringVar({lastSearchString: 'kaplan usmle'})}
+							buttonText={"RV usmle"}
 						/>
 					</div>
 
@@ -235,8 +222,17 @@ const RESTfulExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => setGoogleBooksSearch('kaplan lsat')}
-							buttonText="Search LSAT"
+							onClick={() => setGoogleBooksLastSearchStringVar({lastSearchString: 'kaplan mcat'})}
+							buttonText={"RV mcat"}
+						/>
+					</div>
+
+					<div className="mb-3">
+						<Button
+							type="button"
+							className="btn-success btn-md"
+							onClick={() => setGoogleBooksLastSearchStringVar({lastSearchString: 'kaplan lsat'})}
+							buttonText={"RV lsat"}
 						/>
 					</div>
 
@@ -258,8 +254,7 @@ const RESTfulExample = () => {
 					<div className="mb-3">
 						<Button
 							type="button"
-							className="btn-success btn-md"
-							onClick={() => setGoogleBooksSearch(googleBooksSearchInput)}
+							onClick={() => setGoogleBooksLastSearchStringVar({lastSearchString: googleBooksSearchInput})}
 							buttonText="Get Google Books"
 						/>
 					</div>
