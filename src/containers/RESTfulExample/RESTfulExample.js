@@ -34,12 +34,6 @@ const RESTfulExample = () => {
 			GET_GOOGLE_BOOKS_LAST_SEARCH_STRING,
 	);
 
-	//  const [getLastSearchString, {
-	//      data: lastSearchStringDATAZ,
-	//    }] = useLazyQuery(
-	//      GET_GOOGLE_BOOKS_LAST_SEARCH_STRING
-	//  );
-
 	const onCompleted = () => {
 		console.log('>>>>>>>>>>>>>>>>>>>>>>>> RESTfulExample > QUERY > Completed ++++++++++++++++++++');
 	};
@@ -205,7 +199,7 @@ const RESTfulExample = () => {
 							type="button"
 							className="btn-success btn-md"
 							onClick={() => {console.log(googleBooksLastSearchStringVar())} }
-							buttonText={"Reade RV"}
+							buttonText={"Read RV"}
 						/>
 					</div>
 
