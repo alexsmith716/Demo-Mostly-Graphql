@@ -12,7 +12,6 @@ export class GoogleBooksAPI extends RESTDataSource {
 		return {
 			id: book.id,
 			cursor: `${book.id}`,
-      lastSearchString: '',
 			title: book.volumeInfo.title,
 			authors: book.volumeInfo.authors,
 			publisher: book.volumeInfo.publisher,
@@ -23,9 +22,6 @@ export class GoogleBooksAPI extends RESTDataSource {
 			favorite: false,
 		};
 	}
-
-	// https://www.googleapis.com/books/v1/volumes?q=gmat&startIndex=0&orderBy=newest&projection=lite&maxResults=40
-	// https://www.googleapis.com/books/v1/volumes/XDTlxgEACAAJ
 
 	async getBooks(searchString, orderBy) {
 		try {
