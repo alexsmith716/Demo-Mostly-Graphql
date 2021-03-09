@@ -8,7 +8,7 @@ const googleBooksLastSearchStringInit = {
 };
 
 const charactersLastSearchStringInit = {
-	lastSearchString: null,
+	lastSearchString: '',
 };
 
 export const googleBooksLastSearchStringVar = makeVar(googleBooksLastSearchStringInit);
