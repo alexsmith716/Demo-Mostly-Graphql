@@ -4,7 +4,6 @@ import {
 	useQuery,
 	useLazyQuery,
 	useApolloClient,
-	// useReactiveVar,
 	NetworkStatus,
 	gql,
 } from '@apollo/client';
@@ -14,10 +13,13 @@ import { Loading } from '../../components/Loading';
 import Button from '../../components/Button';
 import { RickAndMortyCharacter } from '../../components/RickAndMortyCharacter';
 import { GET_RICK_AND_MORTY_CHARACTERS, GET_CHARACTERS_LAST_SEARCH_STRING } from '../../graphql/queries/queries.js';
-import { reactiveVariableMutations } from '../../graphql/operations/mutations'
+import { reactiveVariableMutations } from '../../graphql/operations/mutations';
+import { charactersLastSearchStringVar } from '../../apollo/apolloClient';
+
 
 const GraphQLExample = () => {
 
+	const client = useApolloClient();
 	const { setCharactersLastSearchStringVar } = reactiveVariableMutations;
 
 	//  const [errorMessage, setErrorMessage] = useState(null);
@@ -30,19 +32,14 @@ const GraphQLExample = () => {
 	const [toggleCacheView, setToggleCacheView] = useState(false);
 	// const lastSearchStringReactiveVar = useReactiveVar(charactersLastSearchStringVar);
 
-	const client = useApolloClient();
-
 	const {
 			loading: lastSearchStringLOADING, 
 			error: lastSearchStringERROR,
 			data: lastSearchStringDATA,
+			previousData,
 		} = useQuery(
-			GET_CHARACTERS_LAST_SEARCH_STRING
+			GET_CHARACTERS_LAST_SEARCH_STRING,
 	);
-
-	const onCompleted = () => {
-		console.log('>>>>>>>>>>>>>>>>>>>>>>>> GraphQLExample > QUERY > Completed ++++++++++++++++++++');
-	};
 
 	const variables = {
 		filter: { name: `${rickAndMortyCharactersFilterName}`},
@@ -52,10 +49,11 @@ const GraphQLExample = () => {
 			loading: rickAndMortyCharactersLoading, 
 			error: rickAndMortyCharactersError,
 			data: rickAndMortyCharactersData,
-			previousData,
+			previousData: rickAndMortyCharactersPreviousData,
 			refetch,
 			fetchMore,
 			networkStatus,
+			called,
 		}] = useLazyQuery(
 			gql`${GET_RICK_AND_MORTY_CHARACTERS}`,
 			{
@@ -63,40 +61,67 @@ const GraphQLExample = () => {
 				//  nextFetchPolicy: 'cache-first',
 				//  variables,
 				notifyOnNetworkStatusChange: true,
-				onCompleted,
+				onCompleted: () => {
+					if (rickAndMortyCharactersData) {
+						const { characters: { info }} = rickAndMortyCharactersData;
+						const { characters: { results }} = rickAndMortyCharactersData;
+						if (info) {
+							setRickAndMortyCharactersInfo(info);
+							if (!info.prev && info.next) {
+								setRickAndMortyCharactersCurrentPage(1);
+							} else if (info.next && info.prev) {
+								setRickAndMortyCharactersCurrentPage(info.next - 1);
+							} else {
+								setRickAndMortyCharactersCurrentPage(info.pages);
+							}
+						}
+						if (results.length > 0) {
+							setRickAndMortyResults(true);
+						}
+					}
+				}
 			}
 	);
 
-	//  =====================================================================
-
 	useEffect(() => {
-			// console.log('>>>>>>>>>>>>>>>>>>>>>>>> GraphQLExample > lastSearchStringReactiveVar: ', lastSearchStringReactiveVar);
-			if (rickAndMortyCharactersData) {
-				const { characters: { info }} = rickAndMortyCharactersData;
-				const { characters: { results }} = rickAndMortyCharactersData;
-				if (info) {
-					setRickAndMortyCharactersInfo(info);
-					if (!info.prev && info.next) {
-						setRickAndMortyCharactersCurrentPage(1);
-					} else if (info.next && info.prev) {
-						setRickAndMortyCharactersCurrentPage(info.next - 1);
-					} else {
-						setRickAndMortyCharactersCurrentPage(info.pages);
+			if (lastSearchStringDATA) {
+				const { charactersLastSearchString: { lastSearchString }} = lastSearchStringDATA;
+				const previousCharacter = previousData?.charactersLastSearchString.lastSearchString;
+
+				if (lastSearchString !== '') {
+
+					if (!rickAndMortyCharactersData) {
+						getRickAndMortyCharacters({ variables: { filter: {name: lastSearchString }},})
+					}
+
+					if (rickAndMortyCharactersData) {
+
+						if (previousCharacter !== '') {
+
+							if (lastSearchString !== previousCharacter) {
+
+								if (rickAndMortyCharactersPreviousData) {
+									if (called) {
+										refetch({ filter: {name: lastSearchString }});
+									}
+								}
+
+								if (!rickAndMortyCharactersPreviousData) {
+									if (called) {
+										refetch({ filter: {name: lastSearchString }});
+									}
+								}
+							}
+						}
 					}
 				}
-				if (results.length > 0) {
-					setRickAndMortyResults(true);
-				}
 			}
+
 			if (toggleCacheView) {
 				setClientExtract(client.extract());
 			}
-			if (lastSearchStringDATA) {
-				const { charactersLastSearchString: { lastSearchString }} = lastSearchStringDATA;
-				console.log('>>>>>>>>>>>>>>>>>>>>>>>> GraphQLExample > lastSearchString!!!!!: ', lastSearchString);
-			}
 		},
-		[rickAndMortyCharactersData, lastSearchStringDATA, toggleCacheView]
+		[lastSearchStringDATA, toggleCacheView,]
 	);
 
 	return (
@@ -169,8 +194,8 @@ const GraphQLExample = () => {
 						<Button
 							type="button"
 							className="btn-success btn-md"
-							onClick={() => setCharactersLastSearchStringVar({lastSearchString: 'Morty'})}
-							buttonText={"Test Reactive var"}
+							onClick={() => {console.log(charactersLastSearchStringVar())} }
+							buttonText={"Read RV"}
 						/>
 					</div>
 
@@ -200,7 +225,7 @@ const GraphQLExample = () => {
 						<Button
 							type="button"
 							className={`btn-success btn-md`}
-							onClick={() => getRickAndMortyCharacters({variables: {filter: {name: rickAndMortyCharactersFilterName }},})}
+							onClick={() => setCharactersLastSearchStringVar({lastSearchString: rickAndMortyCharactersFilterName})}
 							buttonText="Get Characters"
 						/>
 					</div>
@@ -209,8 +234,8 @@ const GraphQLExample = () => {
 						<Button
 							type="button"
 							className={`btn-success btn-md`}
-							onClick={() => getRickAndMortyCharacters({variables: {filter: {name: 'Rick' }},})}
-							buttonText="get rick chars"
+							onClick={() => setCharactersLastSearchStringVar({lastSearchString: 'Rick'})}
+							buttonText="Get Rick"
 						/>
 					</div>
 
@@ -218,8 +243,8 @@ const GraphQLExample = () => {
 						<Button
 							type="button"
 							className={`btn-success btn-md`}
-							onClick={() => getRickAndMortyCharacters({variables: {filter: {name: 'Beth' }},})}
-							buttonText="get beth chars"
+							onClick={() => setCharactersLastSearchStringVar({lastSearchString: 'Beth'})}
+							buttonText="Get Beth"
 						/>
 					</div>
 
@@ -227,8 +252,8 @@ const GraphQLExample = () => {
 						<Button
 							type="button"
 							className={`btn-success btn-md`}
-							onClick={() => getRickAndMortyCharacters({variables: {filter: {name: 'Morty' }},})}
-							buttonText="get morty chars"
+							onClick={() => setCharactersLastSearchStringVar({lastSearchString: 'Morty'})}
+							buttonText="Get Morty"
 						/>
 					</div>
 

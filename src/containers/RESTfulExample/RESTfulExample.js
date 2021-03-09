@@ -70,7 +70,9 @@ const RESTfulExample = () => {
 	useEffect(() => {
 			if (lastSearchStringDATA) {
 				const { googleBooksLastSearchString: { lastSearchString }} = lastSearchStringDATA;
+
 				if (lastSearchString !== '') {
+
 					if (!googleBooksDATA) {
 						getGoogleBooks({ variables: { searchString: lastSearchString },})
 					} else {
@@ -199,7 +201,7 @@ const RESTfulExample = () => {
 							type="button"
 							className="btn-success btn-md"
 							onClick={() => {console.log(googleBooksLastSearchStringVar())} }
-							buttonText={"Read RV"}
+							buttonText={"Reade RV"}
 						/>
 					</div>
 
@@ -248,6 +250,7 @@ const RESTfulExample = () => {
 					<div className="mb-3">
 						<Button
 							type="button"
+							className="btn-success btn-md"
 							onClick={() => setGoogleBooksLastSearchStringVar({lastSearchString: googleBooksSearchInput})}
 							buttonText="Get Google Books"
 						/>
